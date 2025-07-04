@@ -1,5 +1,7 @@
 package com.github.muffindud.model;
 
+import com.github.muffindud.enums.NotificationTopic;
+import com.github.muffindud.publisher.EventManager;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -7,8 +9,14 @@ import java.util.Map;
 
 public final class Cart extends Product {
     @Getter private final Map<Product, Integer> productQty = new HashMap<>();
+    private boolean thresholdOver = false;
+    private final EventManager eventManager;
     private static final float DISCOUNT_PRICE = 100F;
-    private static final float DISCOUNT_AMOUNT = 0.05F;
+    private static final float DISCOUNT_RATE = 0.05F;
+
+    public Cart(EventManager eventManager) {
+        this.eventManager = eventManager;
+    }
 
     private float getContentsPrice() {
         return this.productQty.entrySet().stream()
@@ -21,7 +29,7 @@ public final class Cart extends Product {
         float totalPrice = this.getContentsPrice();
 
         if (isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
-            totalPrice *= (100F - DISCOUNT_AMOUNT);
+            totalPrice *= (100F - DISCOUNT_RATE);
         }
 
         return totalPrice;
@@ -31,12 +39,24 @@ public final class Cart extends Product {
         return this.getPrice() >= threshold;
     }
 
+    private void notifyIfThresholdCrossed() {
+        if (this.thresholdOver && !isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
+            this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_NOT_APPLIED);
+            this.thresholdOver = false;
+        } else if (!this.thresholdOver && isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
+            this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_APPLIED);
+            this.thresholdOver = true;
+        }
+    }
+
     public Cart add(Pizza pizza, int quantity) {
         if (this.productQty.containsKey(pizza)) {
             this.productQty.put(pizza, this.productQty.get(pizza) + quantity);
         } else {
             this.productQty.put(pizza, quantity);
         }
+
+        this.notifyIfThresholdCrossed();
 
         return this;
     }
@@ -48,10 +68,13 @@ public final class Cart extends Product {
 
     public Cart remove(Pizza pizza, int quantity) {
         if (this.productQty.getOrDefault(pizza, 0) <= quantity) {
-            this.removeAll(pizza);
+            this.productQty.remove(pizza);
         } else {
             this.productQty.put(pizza, this.productQty.get(pizza) + quantity);
         }
+
+        this.notifyIfThresholdCrossed();
+
         return this;
     }
 
@@ -61,7 +84,7 @@ public final class Cart extends Product {
     }
 
     public Cart removeAll(Pizza pizza) {
-        this.productQty.remove(pizza);
+        this.remove(pizza, this.getProductQty().getOrDefault(pizza, 0));
         return this;
     }
 }
