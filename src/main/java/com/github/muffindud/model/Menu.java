@@ -1,4 +1,10 @@
 package com.github.muffindud.model;
 
-public class Menu {
+import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public final class Menu {
+    @Getter private final List<Pizza> pizzas = new ArrayList<>();
 }
