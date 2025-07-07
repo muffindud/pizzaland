@@ -30,7 +30,7 @@ public class App
         testIngredient.setName("Unobtainium");
         testIngredient.setPrice(10);
 
-        testPizza.getIngredientQty().put(testIngredient, 10F);
+        testPizza.getIngredientQty().put(testIngredient, 9.9F);
         testPizza.setName("Pizza with unobtainium");
 
         testPizzaMenu.getPizzas().add(testPizza);

@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 public final class MenuController implements EventListener {
     private final Map<MenuContext, Consumer<String>> inputHandler = new HashMap<>();
     private final Map<NotificationTopic, Runnable> notificationHandler = new HashMap<>();
+    private final Map<String, Runnable> navigationMenu = new HashMap<>();
 
     private Scanner scanner;
 
@@ -24,14 +25,19 @@ public final class MenuController implements EventListener {
     private final PizzaMenu pizzaMenu;
 
     public MenuController(PizzaMenu pizzaMenu, Cart cart) {
-        inputHandler.put(MenuContext.BASE_MENU, this::handleNavigationMenuInput);
-        inputHandler.put(MenuContext.CART, this::handleCartInput);
-        inputHandler.put(MenuContext.COUNTRY_SELECTOR, this::handleCountryInput);
-        inputHandler.put(MenuContext.PIZZA_MENU, this::handlePizzaMenuInput);
+        this.inputHandler.put(MenuContext.BASE_MENU, this::handleNavigationMenuInput);
+        this.inputHandler.put(MenuContext.CART, this::handleCartInput);
+        this.inputHandler.put(MenuContext.COUNTRY_SELECTOR, this::handleCountryInput);
+        this.inputHandler.put(MenuContext.PIZZA_MENU, this::handlePizzaMenuInput);
 
-        notificationHandler.put(NotificationTopic.DISCOUNT_APPLIED, this::sendDiscountApplied);
-        notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
+        this.notificationHandler.put(NotificationTopic.DISCOUNT_APPLIED, this::sendDiscountApplied);
+        this.notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
 
+        navigationMenu.put("1", this::sendPizzaMenuMenu);
+        navigationMenu.put("2", this::sendCartMenu);
+        navigationMenu.put("3", this::sendCountryMenu);
+        navigationMenu.put("0", () -> System.exit(0));
+        
         this.pizzaMenu = pizzaMenu;
         this.cart = cart;
     }
@@ -39,12 +45,12 @@ public final class MenuController implements EventListener {
     public void run() {
         try (Scanner s = new Scanner(System.in)) {
             this.scanner = s;
-            sendNavigationMenu();
+            this.sendNavigationMenu();
         }
     }
 
     private String readInput() {
-        return scanner.nextLine();
+        return this.scanner.nextLine();
     }
 
     private void handleInput(String input, MenuContext context) {
@@ -52,25 +58,17 @@ public final class MenuController implements EventListener {
     }
 
     private void handleNavigationMenuInput(String input) {
-        // TODO: Switch to a map
-        switch (input) {
-            case "1":
-                sendPizzaMenuMenu();
-            case "2":
-                sendCartMenu();
-            case "3":
-                sendCountryMenu();
-            case "0":
-                System.exit(0);
-            default:
-                // TODO: Implement loopback logic
-                System.out.println("Nope");
-                handleNavigationMenuInput(readInput());
-        }
+        this.navigationMenu.getOrDefault(input, () -> {
+            System.out.println("Nope");
+            this.handleNavigationMenuInput(this.readInput());
+        }).run();            
     }
 
     private void handleCartInput(String input) {
-        throw new UnsupportedOperationException("not yet " + input);
+//        throw new UnsupportedOperationException("not yet " + input);
+        System.out.println(CartView.getCartComposition(this.cart));
+
+        this.sendNavigationMenu();
     }
 
     private void handleCountryInput(String input) {
@@ -78,7 +76,10 @@ public final class MenuController implements EventListener {
     }
 
     private void handlePizzaMenuInput(String input) {
-        throw new UnsupportedOperationException("not yet " + input);
+//        throw new UnsupportedOperationException("not yet " + input);
+        this.cart.add(pizzaMenu.getPizzas().get(Integer.parseInt(input) - 1), 1);
+
+        this.sendNavigationMenu();
     }
 
     private void sendNavigationMenu() {
@@ -87,32 +88,32 @@ public final class MenuController implements EventListener {
         System.out.println("[3]. Set current country");
         System.out.println("[0]. Exit");
 
-        handleInput(readInput(), MenuContext.BASE_MENU);
+        this.handleInput(this.readInput(), MenuContext.BASE_MENU);
     }
 
     private void sendCartMenu() {
         System.out.println(CartView.getCartComposition(cart));
-        handleInput(readInput(), MenuContext.CART);
+        this.handleInput(this.readInput(), MenuContext.CART);
     }
 
     private void sendPizzaMenuMenu() {
         System.out.println(PizzaMenuView.getMenu(pizzaMenu));
-        handleInput(readInput(), MenuContext.PIZZA_MENU);
+        this.handleInput(this.readInput(), MenuContext.PIZZA_MENU);
     }
 
     private void sendCountryMenu() {
         // TODO
-        handleInput(readInput(), MenuContext.COUNTRY_SELECTOR);
+        this.handleInput(this.readInput(), MenuContext.COUNTRY_SELECTOR);
     }
 
     private void sendDiscountApplied() {
-        System.out.printf("You're about to spend %.2f. You won %.2f%%",
+        System.out.printf("You're about to spend %.2f. You won %.2f%%\n",
                 ConfigProvider.getDiscount().discountPrice(),
                 ConfigProvider.getDiscount().discountRate() * 100);
     }
 
     private void sendDiscountNotApplied() {
-        System.out.printf("You're no longer over %.2f. %.2f%% discount no longer applied",
+        System.out.printf("You're no longer over %.2f. %.2f%% discount no longer applied\n",
                 ConfigProvider.getDiscount().discountPrice(),
                 ConfigProvider.getDiscount().discountPrice() * 100);
     }
