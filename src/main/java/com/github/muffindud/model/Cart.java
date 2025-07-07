@@ -25,12 +25,16 @@ public final class Cart extends Product {
                 .reduce(0F, Float::sum);
     }
 
+
+    /**
+     * @return total cost of cart with discount rules applied
+     */
     @Override
     public float getPrice() {
         float totalPrice = this.getContentsPrice();
 
         if (isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
-            totalPrice *= (100F - DISCOUNT_RATE);
+            totalPrice *= (1F - DISCOUNT_RATE);
         }
 
         return totalPrice;
@@ -86,6 +90,12 @@ public final class Cart extends Product {
 
     public Cart removeAll(Pizza pizza) {
         this.remove(pizza, this.getProductQty().getOrDefault(pizza, 0));
+        return this;
+    }
+
+    public Cart empty() {
+        this.productQty.clear();
+        this.notifyIfThresholdCrossed();
         return this;
     }
 }
