@@ -41,7 +41,7 @@ public final class Cart extends Product {
     }
 
     private boolean isPriceEqualOrOverThreshold(float threshold) {
-        return this.getPrice() >= threshold;
+        return this.getContentsPrice() >= threshold;
     }
 
     private void notifyIfThresholdCrossed() {
