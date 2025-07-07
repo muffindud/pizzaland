@@ -3,23 +3,22 @@ package com.github.muffindud.view;
 import com.github.muffindud.model.Cart;
 import com.github.muffindud.model.Product;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class CartView {
     public String getCartComposition(Cart cart) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("You currently have: \n");
+        final Iterator<Map.Entry<Product, Integer>> cartEntryIterator = cart.getProductQty().entrySet().iterator();
 
-        for (Map.Entry<Product, Integer> productQty : cart.getProductQty().entrySet()) {
-            sb.append(productQty.getValue())
-                    .append(" x ")
-                    .append(productQty.getKey().getName())
-                    .append("\n");
-        }
-
-        sb.append("Total price: ")
-                .append(cart.getPrice());
-
-        return sb.toString();
+        return  "You currently have: \n" +
+                IntStream.range(0, cart.getProductQty().size())
+                        .mapToObj(i -> {
+                            Map.Entry<Product, Integer> entry = cartEntryIterator.next();
+                            return "[" + i + "]." + entry.getValue() + " x " + entry.getKey().getName() + "\n";
+                        })
+                        .collect(Collectors.joining()) +
+                "Total price: " + cart.getPrice();
     }
 }
