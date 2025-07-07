@@ -5,6 +5,6 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Menu {
+public final class PizzaMenu {
     @Getter private final List<Pizza> pizzas = new ArrayList<>();
 }
