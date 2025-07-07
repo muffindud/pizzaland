@@ -1,5 +1,6 @@
 package com.github.muffindud.model;
 
+import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.publisher.EventManager;
 import lombok.Getter;
@@ -11,8 +12,8 @@ public final class Cart extends Product {
     @Getter private final Map<Product, Integer> productQty = new HashMap<>();
     private boolean thresholdOver = false;
     private final EventManager eventManager;
-    private static final float DISCOUNT_PRICE = 100F;
-    private static final float DISCOUNT_RATE = 0.05F;
+    private static final float DISCOUNT_PRICE = ConfigProvider.getDiscount().discountPrice();
+    private static final float DISCOUNT_RATE = ConfigProvider.getDiscount().discountRate();
 
     public Cart(EventManager eventManager) {
         this.eventManager = eventManager;

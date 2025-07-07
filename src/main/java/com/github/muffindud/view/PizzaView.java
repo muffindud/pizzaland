@@ -1,4 +1,4 @@
 package com.github.muffindud.view;
 
-public class PizzaView {
+public final class PizzaView {
 }

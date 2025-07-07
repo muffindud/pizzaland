@@ -3,18 +3,18 @@ package com.github.muffindud.publisher;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.listener.EventListener;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class EventManager {
-    private final ConcurrentMap<NotificationTopic, List<EventListener>> listeners =
+public final class EventManager {
+    private final ConcurrentMap<NotificationTopic, Set<EventListener>> listeners =
             new ConcurrentHashMap<>();
 
     public EventManager() {
         for (NotificationTopic topic : NotificationTopic.values()) {
-            this.listeners.put(topic, new ArrayList<>());
+            this.listeners.put(topic, new HashSet<>());
         }
     }
 
@@ -28,7 +28,7 @@ public class EventManager {
 
     public void notifySubscribers(NotificationTopic topic) {
         for (EventListener listener : this.listeners.get(topic)) {
-            listener.update();
+            listener.update(topic);
         }
     }
 }

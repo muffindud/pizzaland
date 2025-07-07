@@ -1,5 +1,7 @@
 package com.github.muffindud.listener;
 
+import com.github.muffindud.enums.NotificationTopic;
+
 public interface EventListener {
-    void update();
+    void update(NotificationTopic topic);
 }

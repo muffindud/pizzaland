@@ -5,9 +5,9 @@ import com.github.muffindud.model.Product;
 
 import java.util.Map;
 
-public class CartView {
+public final class CartView {
     public String getCartComposition(Cart cart) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("You currently have: \n");
 
         for (Map.Entry<Product, Integer> productQty : cart.getProductQty().entrySet()) {
