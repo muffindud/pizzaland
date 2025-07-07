@@ -5,7 +5,9 @@ import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.Cart;
+import com.github.muffindud.model.PizzaMenu;
 import com.github.muffindud.view.CartView;
+import com.github.muffindud.view.PizzaMenuView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +18,12 @@ public final class MenuController implements EventListener {
     private final Map<MenuContext, Consumer<String>> inputHandler = new HashMap<>();
     private final Map<NotificationTopic, Runnable> notificationHandler = new HashMap<>();
 
-    private Cart cart;
-    private CartView cartView;
+    private Scanner scanner;
 
-    public MenuController() {
+    private final Cart cart;
+    private final PizzaMenu pizzaMenu;
+
+    public MenuController(PizzaMenu pizzaMenu, Cart cart) {
         inputHandler.put(MenuContext.BASE_MENU, this::handleNavigationMenuInput);
         inputHandler.put(MenuContext.CART, this::handleCartInput);
         inputHandler.put(MenuContext.COUNTRY_SELECTOR, this::handleCountryInput);
@@ -27,16 +31,20 @@ public final class MenuController implements EventListener {
 
         notificationHandler.put(NotificationTopic.DISCOUNT_APPLIED, this::sendDiscountApplied);
         notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
+
+        this.pizzaMenu = pizzaMenu;
+        this.cart = cart;
     }
 
     public void run() {
-        sendNavigationMenu();
+        try (Scanner s = new Scanner(System.in)) {
+            this.scanner = s;
+            sendNavigationMenu();
+        }
     }
 
     private String readInput() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            return scanner.nextLine();
-        }
+        return scanner.nextLine();
     }
 
     private void handleInput(String input, MenuContext context) {
@@ -44,19 +52,33 @@ public final class MenuController implements EventListener {
     }
 
     private void handleNavigationMenuInput(String input) {
-
+        // TODO: Switch to a map
+        switch (input) {
+            case "1":
+                sendPizzaMenuMenu();
+            case "2":
+                sendCartMenu();
+            case "3":
+                sendCountryMenu();
+            case "0":
+                System.exit(0);
+            default:
+                // TODO: Implement loopback logic
+                System.out.println("Nope");
+                handleNavigationMenuInput(readInput());
+        }
     }
 
     private void handleCartInput(String input) {
-
+        throw new UnsupportedOperationException("not yet " + input);
     }
 
     private void handleCountryInput(String input) {
-
+        throw new UnsupportedOperationException("not yet " + input);
     }
 
     private void handlePizzaMenuInput(String input) {
-
+        throw new UnsupportedOperationException("not yet " + input);
     }
 
     private void sendNavigationMenu() {
@@ -69,7 +91,18 @@ public final class MenuController implements EventListener {
     }
 
     private void sendCartMenu() {
-        System.out.println(cartView.getCartComposition(cart));
+        System.out.println(CartView.getCartComposition(cart));
+        handleInput(readInput(), MenuContext.CART);
+    }
+
+    private void sendPizzaMenuMenu() {
+        System.out.println(PizzaMenuView.getMenu(pizzaMenu));
+        handleInput(readInput(), MenuContext.PIZZA_MENU);
+    }
+
+    private void sendCountryMenu() {
+        // TODO
+        handleInput(readInput(), MenuContext.COUNTRY_SELECTOR);
     }
 
     private void sendDiscountApplied() {

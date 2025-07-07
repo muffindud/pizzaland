@@ -3,7 +3,7 @@ package com.github.muffindud.view;
 import com.github.muffindud.model.Ingredient;
 
 public final class IngredientView {
-    public String getIngredientUnitPrice(Ingredient ingredient) {
+    public static String getIngredientUnitPrice(Ingredient ingredient) {
         return  "Ingredient: " +
                 ingredient.getName() +
                 "\n" +

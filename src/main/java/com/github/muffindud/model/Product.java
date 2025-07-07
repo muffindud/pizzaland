@@ -5,7 +5,7 @@ import lombok.Setter;
 
 public abstract class Product {
     @Getter @Setter protected String name;
-    protected float price;
+    @Setter protected float price;
 
     public abstract float getPrice();
 }
