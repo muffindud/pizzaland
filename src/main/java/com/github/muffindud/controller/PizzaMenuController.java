@@ -4,13 +4,18 @@ import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.listener.EventListener;
+import com.github.muffindud.model.Ingredient;
+import com.github.muffindud.model.Pizza;
 import com.github.muffindud.model.PizzaMenu;
 import com.github.muffindud.view.PizzaMenuView;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
+@Slf4j
 public final class PizzaMenuController extends BaseController implements EventListener {
     private final Map<NotificationTopic, Runnable> notificationHandler = new HashMap<>();
     private final PizzaMenu pizzaMenu;
@@ -21,16 +26,50 @@ public final class PizzaMenuController extends BaseController implements EventLi
         this.notificationHandler.put(NotificationTopic.DISCOUNT_APPLIED, this::sendDiscountApplied);
         this.notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
 
+        // TODO: Remove when implementing factories
+        Ingredient unobtainium = new Ingredient();
+        unobtainium.setPrice(10F);
+        unobtainium.setName("Unobtainium");
+
+        Ingredient unobtainium2 = new Ingredient();
+        unobtainium2.setPrice(15F);
+        unobtainium2.setName("Unobtainium2");
+
+        Pizza testPizza = new Pizza();
+        testPizza.setName("Unobtainium pizza");
+        testPizza.getIngredientQty().put(unobtainium, 9.9F);
+
+        Pizza testPizza2 = new Pizza();
+        testPizza2.setName("Unobtainium2 pizza");
+        testPizza2.getIngredientQty().put(unobtainium2, 9.9F);
+
+
+        pizzaMenu.getPizzas().add(testPizza);
+        pizzaMenu.getPizzas().add(testPizza2);
+
         this.pizzaMenu = pizzaMenu;
     }
 
     public void handlePizzaMenuInput(String input) {
-        // Add the selected pizza to cart (perhaps observer with cart as listener?)
+        log.info("Received {}", input);
+
+        if (Objects.equals(input, "0")) {
+            log.info("Returning to navigation menu");
+            BaseController.sendNavigationMenu();
+            BaseController.handleNavigationMenuInput();
+        } else {
+            System.out.println("Added " + this.pizzaMenu.getPizzas().get(Integer.parseInt(input) - 1).getName());
+            this.sendPizzaMenuMenu();
+            this.handleInput();
+        }
+
+        // TODO: Add the selected pizza to cart (perhaps observer with cart as listener?)
     }
 
     public void sendPizzaMenuMenu() {
-        System.out.println(PizzaMenuView.getMenu(pizzaMenu));
-        handleInput(MenuContext.PIZZA_MENU);
+        log.info("Sending pizza menu");
+        System.out.println(PizzaMenuView.getMenu(this.pizzaMenu));
+        System.out.println("[0]. Back");
     }
 
     private void sendDiscountApplied() {

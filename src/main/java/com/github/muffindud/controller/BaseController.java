@@ -22,8 +22,8 @@ public abstract class BaseController {
         return BaseController.scanner.nextLine();
     }
 
-    public static void handleInput(MenuContext context) {
-        BaseController.inputHandler.get(context).accept(readInput());
+    public void handleInput() {
+        BaseController.inputHandler.get(this.contextName()).accept(BaseController.readInput());
     }
 
     public static void sendNavigationMenu() {
@@ -55,7 +55,10 @@ public abstract class BaseController {
         BaseController.inputHandler.put(this.contextName(), this.contextInputHandler());
         log.info("Added handler for \"{}\"", this.contextName());
 
-        BaseController.navigationMenu.put(this.actionKey(), this.action());
+        BaseController.navigationMenu.put(this.actionKey(), () -> {
+            this.action().run();
+            this.handleInput();
+        });
         BaseController.navigationMenuMessage += "[" + this.actionKey() + "]. " + this.actionName() + "\n";
         log.info("Added \"{}\" action with key \"{}\"", this.actionName(), this.actionKey());
     }

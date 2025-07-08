@@ -6,6 +6,8 @@ import com.github.muffindud.controller.CountryController;
 import com.github.muffindud.controller.PizzaMenuController;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.model.Cart;
+import com.github.muffindud.model.Ingredient;
+import com.github.muffindud.model.Pizza;
 import com.github.muffindud.model.PizzaMenu;
 import com.github.muffindud.publisher.EventManager;
 import com.github.muffindud.service.BaseService;
@@ -23,12 +25,6 @@ public final class PizzaLand extends BaseService {
     public PizzaLand() {
         this.eventManager.subscribe(this.pizzaMenuController, NotificationTopic.DISCOUNT_APPLIED);
         this.eventManager.subscribe(this.pizzaMenuController, NotificationTopic.DISCOUNT_NOT_APPLIED);
-
-//        this.inputHandler.put(MenuContext.BASE_MENU, this::handleNavigationMenuInput);
-//        this.inputHandler.put(MenuContext.COUNTRY_SELECTOR, this::handleCountryInput);
-
-//        this.navigationMenu.put("3", this::sendCountryMenu);
-//        this.navigationMenu.put("0", () -> System.exit(0));
     }
 
     @Override
