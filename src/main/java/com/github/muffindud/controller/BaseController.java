@@ -18,7 +18,7 @@ public abstract class BaseController {
     private final static Map<String, Runnable> navigationMenu = new HashMap<>();
     private static String navigationMenuMessage = "";
 
-    private static String readInput() {
+    protected static String readInput() {
         return BaseController.scanner.nextLine();
     }
 

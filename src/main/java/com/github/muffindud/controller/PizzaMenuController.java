@@ -64,8 +64,10 @@ public final class PizzaMenuController extends BaseController implements EventLi
             BaseController.handleNavigationMenuInput();
         } else {
             Pizza pizza = this.pizzaMenu.getPizzas().get(Integer.parseInt(input) - 1);
-            this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, 1));
-            System.out.println("Added " + pizza.getName());
+            int count = promptForCount();
+
+            this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, count));
+            System.out.println("Added " + count + " x " + pizza.getName());
 
             this.sendPizzaMenuMenu();
             this.handleInput();
@@ -78,6 +80,14 @@ public final class PizzaMenuController extends BaseController implements EventLi
         log.info("Sending pizza menu");
         System.out.println(PizzaMenuView.getMenu(this.pizzaMenu));
         System.out.println("[0]. Back");
+    }
+
+    private int promptForCount() {
+        System.out.print("Count: ");
+        int count = Integer.parseInt(BaseController.readInput());
+        System.out.println();
+
+        return count;
     }
 
     private void sendDiscountApplied() {

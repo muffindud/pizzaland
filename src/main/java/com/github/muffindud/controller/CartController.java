@@ -6,14 +6,20 @@ import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.Cart;
 import com.github.muffindud.model.Pizza;
+import com.github.muffindud.model.Product;
 import com.github.muffindud.publisher.EventManager;
 import com.github.muffindud.utils.PizzaMessage;
 import com.github.muffindud.view.CartView;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+@Slf4j
 public final class CartController extends BaseController implements EventListener {
     private final Map<NotificationTopic, Consumer<Object>> notificationHandler = new HashMap<>();
 
@@ -82,11 +88,28 @@ public final class CartController extends BaseController implements EventListene
 
     private void sendCartMenu() {
         System.out.println(CartView.getCartComposition(cart));
+        System.out.println("\n[0]. Back");
     }
 
     // TODO
     private void handleCartInput(String input) {
         // Handle the selected item in cart
+
+        log.info("Received {}", input);
+
+        if (Objects.equals(input, "0")) {
+            log.info("Returning to navigation menu");
+            BaseController.sendNavigationMenu();
+            BaseController.handleNavigationMenuInput();
+        } else {
+            Map.Entry<Product, Integer> pizzaEntry = new ArrayList<>(this.cart.getProductQty().entrySet()).get(Integer.parseInt(input) - 1);
+            Pizza pizza = (Pizza) pizzaEntry.getKey();
+            int count = pizzaEntry.getValue();
+            System.out.println(pizza.getName() + " x " + count + " = " + pizza.getPrice() * count);
+
+            this.sendCartMenu();
+            this.handleInput();
+        }
     }
 
     @Override
