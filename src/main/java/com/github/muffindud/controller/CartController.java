@@ -3,14 +3,20 @@ package com.github.muffindud.controller;
 import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
+import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.Cart;
 import com.github.muffindud.model.Pizza;
 import com.github.muffindud.publisher.EventManager;
+import com.github.muffindud.utils.PizzaMessage;
 import com.github.muffindud.view.CartView;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public final class CartController extends BaseController {
+public final class CartController extends BaseController implements EventListener {
+    private final Map<NotificationTopic, Consumer<Object>> notificationHandler = new HashMap<>();
+
     private final Cart cart;
     private final EventManager eventManager;
     private boolean thresholdOver = false;
@@ -20,16 +26,19 @@ public final class CartController extends BaseController {
     public CartController(Cart cart, EventManager eventManager) {
         super();
 
+        this.notificationHandler.put(NotificationTopic.CART_ITEM_ADDED, this::handlePizzaAdd);
+        this.notificationHandler.put(NotificationTopic.CART_ITEM_REMOVED, this::handlePizzaRemove);
+
         this.cart = cart;
         this.eventManager = eventManager;
     }
 
     private void notifyIfThresholdCrossed() {
         if (this.thresholdOver && !this.cart.isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
-            this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_NOT_APPLIED);
+            this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_NOT_APPLIED, null);
             this.thresholdOver = false;
         } else if (!this.thresholdOver && this.cart.isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
-            this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_APPLIED);
+            this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_APPLIED, null);
             this.thresholdOver = true;
         }
     }
@@ -103,5 +112,20 @@ public final class CartController extends BaseController {
     @Override
     protected Runnable action() {
         return this::sendCartMenu;
+    }
+
+    @Override
+    public void update(NotificationTopic topic, Object message) {
+        this.notificationHandler.get(topic).accept(message);
+    }
+
+    private void handlePizzaAdd(Object message) {
+        PizzaMessage pizzaMessage = (PizzaMessage) message;
+        this.add(pizzaMessage.getPizza(), pizzaMessage.getCount());
+    }
+
+    private void handlePizzaRemove(Object message) {
+        PizzaMessage pizzaMessage = (PizzaMessage) message;
+        this.remove(pizzaMessage.getPizza(), pizzaMessage.getCount());
     }
 }

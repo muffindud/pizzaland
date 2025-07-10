@@ -7,6 +7,8 @@ import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.Ingredient;
 import com.github.muffindud.model.Pizza;
 import com.github.muffindud.model.PizzaMenu;
+import com.github.muffindud.publisher.EventManager;
+import com.github.muffindud.utils.PizzaMessage;
 import com.github.muffindud.view.PizzaMenuView;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +22,9 @@ public final class PizzaMenuController extends BaseController implements EventLi
     private final Map<NotificationTopic, Runnable> notificationHandler = new HashMap<>();
     private final PizzaMenu pizzaMenu;
 
-    public PizzaMenuController(PizzaMenu pizzaMenu) {
+    private final EventManager eventManager;
+
+    public PizzaMenuController(PizzaMenu pizzaMenu, EventManager eventManager) {
         super();
 
         this.notificationHandler.put(NotificationTopic.DISCOUNT_APPLIED, this::sendDiscountApplied);
@@ -48,6 +52,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
         pizzaMenu.getPizzas().add(testPizza2);
 
         this.pizzaMenu = pizzaMenu;
+        this.eventManager = eventManager;
     }
 
     public void handlePizzaMenuInput(String input) {
@@ -58,7 +63,10 @@ public final class PizzaMenuController extends BaseController implements EventLi
             BaseController.sendNavigationMenu();
             BaseController.handleNavigationMenuInput();
         } else {
-            System.out.println("Added " + this.pizzaMenu.getPizzas().get(Integer.parseInt(input) - 1).getName());
+            Pizza pizza = this.pizzaMenu.getPizzas().get(Integer.parseInt(input) - 1);
+            this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, 1));
+            System.out.println("Added " + pizza.getName());
+
             this.sendPizzaMenuMenu();
             this.handleInput();
         }
@@ -85,7 +93,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
     }
 
     @Override
-    public void update(NotificationTopic topic) {
+    public void update(NotificationTopic topic, Object message) {
         this.notificationHandler.get(topic).run();
     }
 

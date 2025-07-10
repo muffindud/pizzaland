@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public final class EventManager {
+public class CartEventManager {
     private final ConcurrentMap<NotificationTopic, Set<EventListener>> listeners =
             new ConcurrentHashMap<>();
 
-    public EventManager() {
+    public CartEventManager() {
         for (NotificationTopic topic : NotificationTopic.values()) {
             this.listeners.put(topic, new HashSet<>());
         }
@@ -26,9 +26,9 @@ public final class EventManager {
         this.listeners.get(topic).remove(listener);
     }
 
-    public void notifySubscribers(NotificationTopic topic, Object message) {
+    public void notifySubscribers(NotificationTopic topic) {
         for (EventListener listener : this.listeners.get(topic)) {
-            listener.update(topic, message);
+            listener.update(topic, null);
         }
     }
 }
