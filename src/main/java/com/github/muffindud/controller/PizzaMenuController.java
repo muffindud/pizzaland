@@ -55,7 +55,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
         this.eventManager = eventManager;
     }
 
-    public void handlePizzaMenuInput(String input) {
+    private void handlePizzaMenuInput(String input) {
         log.info("Received {}", input);
 
         if (Objects.equals(input, "0")) {
@@ -76,7 +76,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
         // TODO: Add the selected pizza to cart (perhaps observer with cart as listener?)
     }
 
-    public void sendPizzaMenuMenu() {
+    private void sendPizzaMenuMenu() {
         log.info("Sending pizza menu");
         System.out.println(PizzaMenuView.getMenu(this.pizzaMenu));
         System.out.println("[0]. Back");

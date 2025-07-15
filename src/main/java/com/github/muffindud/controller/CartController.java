@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Slf4j
 public final class CartController extends BaseController implements EventListener {
@@ -49,7 +48,7 @@ public final class CartController extends BaseController implements EventListene
         }
     }
 
-    public void add(Pizza pizza, int quantity) {
+    private void add(Pizza pizza, int quantity) {
         if (this.cart.getProductQty().containsKey(pizza)) {
             this.cart.getProductQty().put(pizza, this.cart.getProductQty().get(pizza) + quantity);
         } else {
@@ -59,11 +58,11 @@ public final class CartController extends BaseController implements EventListene
         this.notifyIfThresholdCrossed();
     }
 
-    public void add(Pizza pizza) {
+    private void add(Pizza pizza) {
         this.add(pizza, 1);
     }
 
-    public void remove(Pizza pizza, int quantity) {
+    private void remove(Pizza pizza, int quantity) {
         if (this.cart.getProductQty().getOrDefault(pizza, 0) <= quantity) {
             this.cart.getProductQty().remove(pizza);
         } else {
@@ -73,15 +72,15 @@ public final class CartController extends BaseController implements EventListene
         this.notifyIfThresholdCrossed();
     }
 
-    public void removeOne(Pizza pizza) {
+    private void removeOne(Pizza pizza) {
         this.remove(pizza, 1);
     }
 
-    public void removeAll(Pizza pizza) {
+    private void removeAll(Pizza pizza) {
         this.remove(pizza, this.cart.getProductQty().getOrDefault(pizza, 0));
     }
 
-    public void empty() {
+    private void empty() {
         this.cart.getProductQty().clear();
         this.notifyIfThresholdCrossed();
     }
@@ -91,9 +90,8 @@ public final class CartController extends BaseController implements EventListene
         System.out.println("\n[0]. Back");
     }
 
-    // TODO
     private void handleCartInput(String input) {
-        // Handle the selected item in cart
+        // TODO: Handle the selected item in cart
 
         log.info("Received {}", input);
 

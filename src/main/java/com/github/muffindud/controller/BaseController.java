@@ -22,17 +22,27 @@ public abstract class BaseController {
         return BaseController.scanner.nextLine();
     }
 
+    /**
+     * Execute the function for the current context passing the input from the console
+     */
     public void handleInput() {
         BaseController.inputHandler.get(this.contextName()).accept(BaseController.readInput());
     }
 
+    /**
+     * Print the navigation menu with the keys and names to the endpoints
+     */
     public static void sendNavigationMenu() {
         System.out.println(BaseController.navigationMenuMessage);
     }
 
+    /**
+     * Execute the respective endpoint at the specified key.
+     * Reruns if the key is not defined
+     */
     public static void handleNavigationMenuInput() {
         BaseController.navigationMenu.getOrDefault(BaseController.readInput(), () -> {
-            System.out.println("Nope");
+            System.out.println("The key is no defined");
             BaseController.handleNavigationMenuInput();
         }).run();
     }
@@ -45,10 +55,41 @@ public abstract class BaseController {
         BaseController.navigationMenuMessage += "[0]. Exit \n";
     }
 
+    /**
+     * The context in which the input should be handled
+     *
+     * @return context
+     */
     protected abstract MenuContext contextName();
+
+    /**
+     * The consumer function which will be executed in it's defined context.
+     * The function takes as parameter the input from the console
+     *
+     * @return function with one String parameter
+     */
     protected abstract Consumer<String> contextInputHandler();
+
+    /**
+     * The endpoint key which is used to access the context from the navigation menu
+     *
+     * @return endpoint key
+     */
     protected abstract String actionKey();
+
+    /**
+     * The name of the endpoint used to display in the navigation menu
+     *
+     * @return endpoint name
+     */
     protected abstract String actionName();
+
+    /**
+     * The method that will be run upon accessing the respective endpoint key.
+     * Should have menu print with key handler
+     *
+     * @return endpoint method
+     */
     protected abstract Runnable action();
 
     BaseController() {

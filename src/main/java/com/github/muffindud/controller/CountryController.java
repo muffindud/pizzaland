@@ -10,11 +10,11 @@ public final class CountryController extends BaseController {
     }
 
     private void sendCountryMenu() {
-        // Show the list of countries
+        // TODO: Show the list of countries
     }
 
     private void handleCountryInput(String input) {
-        // Select country (with an observer that changes the pizza factory?)
+        // TODO: Select country (with an observer that changes the pizza factory?)
     }
 
     @Override

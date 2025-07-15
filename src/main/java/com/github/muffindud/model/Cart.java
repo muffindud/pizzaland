@@ -29,6 +29,12 @@ public final class Cart extends Product {
         return totalPrice;
     }
 
+    /**
+     * Check if the contents of the cart is greater or equal than the specified threshold
+     *
+     * @param threshold to check the price against
+     * @return `true` if price is equal or greater than the threshold, `false` if otherwise
+     */
     public boolean isPriceEqualOrOverThreshold(float threshold) {
         return this.getContentsPrice() >= threshold;
     }
