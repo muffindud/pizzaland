@@ -1,10 +1,8 @@
 package com.github.muffindud.controller;
 
-import com.github.muffindud.builder.PizzaBuilder;
 import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
-import com.github.muffindud.enums.Unit;
 import com.github.muffindud.factory.PizzaFactory;
 import com.github.muffindud.factory.impl.AmericanPizzaFactory;
 import com.github.muffindud.listener.EventListener;
