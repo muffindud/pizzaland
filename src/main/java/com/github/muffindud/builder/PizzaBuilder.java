@@ -1,5 +1,6 @@
 package com.github.muffindud.builder;
 
+import com.github.muffindud.enums.Crust;
 import com.github.muffindud.model.Pizza;
 import com.github.muffindud.model.PizzaBase;
 import com.github.muffindud.model.PizzaSauce;
@@ -14,6 +15,7 @@ import java.util.Objects;
 public final class PizzaBuilder {
     private String pizzaName;
     private Pair<PizzaBase, Float> baseQty;
+    private Crust crust;
     private Pair<PizzaSauce, Float> sauceQty;
     private Map<PizzaTopping, Float> toppingsQty;
     private int cookTempCelsius;
@@ -26,6 +28,11 @@ public final class PizzaBuilder {
 
     public PizzaBuilder setBase(PizzaBase base, float qty) {
         this.baseQty = new ImmutablePair<>(base, qty);
+        return this;
+    }
+
+    public PizzaBuilder setCrust(Crust crust) {
+        this.crust = crust;
         return this;
     }
 
@@ -51,6 +58,14 @@ public final class PizzaBuilder {
     }
 
     public Pizza build() {
-        return new Pizza(this.pizzaName, this.baseQty, this.sauceQty, this.toppingsQty, this.cookTempCelsius, this.cookTimeMinutes);
+        return new Pizza(
+                this.pizzaName,
+                this.baseQty,
+                this.crust,
+                this.sauceQty,
+                this.toppingsQty,
+                this.cookTempCelsius,
+                this.cookTimeMinutes
+        );
     }
 }

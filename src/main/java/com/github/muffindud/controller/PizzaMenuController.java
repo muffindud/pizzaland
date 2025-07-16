@@ -5,6 +5,8 @@ import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.enums.Unit;
+import com.github.muffindud.factory.PizzaFactory;
+import com.github.muffindud.factory.impl.AmericanPizzaFactory;
 import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.*;
 import com.github.muffindud.publisher.EventManager;
@@ -31,23 +33,11 @@ public final class PizzaMenuController extends BaseController implements EventLi
         this.notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
 
         // TODO: Remove when implementing factories
-        PizzaBase wheatDough = new PizzaBase("Wheat Dough", 0.1F, Unit.GRAM);
-        PizzaSauce tomatoSauce = new PizzaSauce("Tomato Sauce", 0.5F, Unit.GRAM);
-        PizzaTopping sausage = new PizzaTopping("Sausage", 0.15F, Unit.GRAM);
-        PizzaTopping champignonMushrooms = new PizzaTopping("Champignon Mushrooms", 0.75F, Unit.GRAM);
-        PizzaTopping mozzarellaCheese = new PizzaTopping("Mozzarella Cheese", 0.2F, Unit.GRAM);
+        PizzaFactory pizzaFactory = new AmericanPizzaFactory();
 
-        Pizza testPizza = new PizzaBuilder()
-                .setName("Homemade Pizza")
-                .setBase(wheatDough, 100F)
-                .setSauce(tomatoSauce, 50F)
-                .addTopping(sausage, 100F)
-                .addTopping(champignonMushrooms, 25F)
-                .addTopping(mozzarellaCheese, 150F)
-                .cook(170, 25)
-                .build();
-
-        pizzaMenu.getPizzas().add(testPizza);
+        pizzaMenu.getPizzas().add(pizzaFactory.createSausagePizza());
+        pizzaMenu.getPizzas().add(pizzaFactory.createVegetarianPizza());
+        pizzaMenu.getPizzas().add(pizzaFactory.createVeganPizza());
 
         this.pizzaMenu = pizzaMenu;
         this.eventManager = eventManager;
