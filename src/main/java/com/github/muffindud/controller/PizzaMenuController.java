@@ -1,12 +1,12 @@
 package com.github.muffindud.controller;
 
+import com.github.muffindud.builder.PizzaBuilder;
 import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
+import com.github.muffindud.enums.Unit;
 import com.github.muffindud.listener.EventListener;
-import com.github.muffindud.model.Ingredient;
-import com.github.muffindud.model.Pizza;
-import com.github.muffindud.model.PizzaMenu;
+import com.github.muffindud.model.*;
 import com.github.muffindud.publisher.EventManager;
 import com.github.muffindud.utils.PizzaMessage;
 import com.github.muffindud.view.PizzaMenuView;
@@ -31,25 +31,23 @@ public final class PizzaMenuController extends BaseController implements EventLi
         this.notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
 
         // TODO: Remove when implementing factories
-        Ingredient unobtainium = new Ingredient();
-        unobtainium.setPrice(10F);
-        unobtainium.setName("Unobtainium");
+        PizzaBase wheatDough = new PizzaBase("Wheat Dough", 0.1F, Unit.GRAM);
+        PizzaSauce tomatoSauce = new PizzaSauce("Tomato Sauce", 0.5F, Unit.GRAM);
+        PizzaTopping sausage = new PizzaTopping("Sausage", 0.15F, Unit.GRAM);
+        PizzaTopping champignonMushrooms = new PizzaTopping("Champignon Mushrooms", 0.75F, Unit.GRAM);
+        PizzaTopping mozzarellaCheese = new PizzaTopping("Mozzarella Cheese", 0.2F, Unit.GRAM);
 
-        Ingredient unobtainium2 = new Ingredient();
-        unobtainium2.setPrice(15F);
-        unobtainium2.setName("Unobtainium2");
-
-        Pizza testPizza = new Pizza();
-        testPizza.setName("Unobtainium pizza");
-        testPizza.getIngredientQty().put(unobtainium, 9.9F);
-
-        Pizza testPizza2 = new Pizza();
-        testPizza2.setName("Unobtainium2 pizza");
-        testPizza2.getIngredientQty().put(unobtainium2, 9.9F);
-
+        Pizza testPizza = new PizzaBuilder()
+                .setName("Homemade Pizza")
+                .setBase(wheatDough, 100F)
+                .setSauce(tomatoSauce, 50F)
+                .addTopping(sausage, 100F)
+                .addTopping(champignonMushrooms, 25F)
+                .addTopping(mozzarellaCheese, 150F)
+                .cook(170, 25)
+                .build();
 
         pizzaMenu.getPizzas().add(testPizza);
-        pizzaMenu.getPizzas().add(testPizza2);
 
         this.pizzaMenu = pizzaMenu;
         this.eventManager = eventManager;
