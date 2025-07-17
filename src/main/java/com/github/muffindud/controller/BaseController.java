@@ -27,7 +27,7 @@ public abstract class BaseController {
      */
     public void handleInput() {
         String input;
-        boolean operationPermitted = true;
+        boolean operationPermitted;
         do {
             input = BaseController.readInput();
             operationPermitted = this.isOperationPermitted(input);
@@ -63,7 +63,7 @@ public abstract class BaseController {
             log.info("Exiting...");
             System.exit(0);
         });
-        BaseController.navigationMenuMessage += "[0]. Exit \n";
+        BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption("0", "Exit");
     }
 
     /**
@@ -111,6 +111,10 @@ public abstract class BaseController {
      */
     protected abstract boolean isOperationPermitted(String input);
 
+    public static String formatMenuMessageOption(String input, String message) {
+        return "[" + input + "]. " + message + "\n";
+    }
+
     BaseController() {
         BaseController.inputHandler.put(this.contextName(), this.contextInputHandler());
         log.info("Added handler for \"{}\"", this.contextName());
@@ -119,7 +123,7 @@ public abstract class BaseController {
             this.action().run();
             this.handleInput();
         });
-        BaseController.navigationMenuMessage += "[" + this.actionKey() + "]. " + this.actionName() + "\n";
+        BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption(this.actionKey(), this.actionName());
         log.info("Added \"{}\" action with key \"{}\"", this.actionName(), this.actionKey());
     }
 }

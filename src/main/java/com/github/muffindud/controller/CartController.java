@@ -26,8 +26,12 @@ import java.util.function.Consumer;
 @Slf4j
 public final class CartController extends BaseController implements EventListener {
     private final Map<NotificationTopic, Consumer<Object>> notificationHandler = new HashMap<>();
+
     private final Map<String, Runnable> orderMenuInputHandler = new HashMap<>();
     private String orderMenuMessage = "";
+
+    private final Map<String, Consumer<Pizza>> cartItemHandler = new HashMap<>();
+    private String cartItemMessage = "";
 
     private final Cart cart;
     private final EventManager eventManager;
@@ -45,13 +49,25 @@ public final class CartController extends BaseController implements EventListene
         this.addOrderMenuInput("O", "Create Order", this::makeOrder);
         this.addOrderMenuInput("C", "Clear Cart", this::empty);
 
+        this.addCartItemOption("R", "Remove all", this::removeAll);
+        this.addCartItemOption("A", "Add custom quantity", this::handleAddCustomQty);
+        this.addCartItemOption("+", "Add one", this::add);
+        this.addCartItemOption("D", "Decrease custom quantity", this::handleDecreaseCustomQty);
+        this.addCartItemOption("-", "Decrease one", this::removeOne);
+        this.addCartItemOption("S", "Set quantity", this::handleSetCustomQty);
+
         this.cart = cart;
         this.eventManager = eventManager;
     }
 
     private void addOrderMenuInput(String input, String message, Runnable action) {
         this.orderMenuInputHandler.put(input, action);
-        this.orderMenuMessage += "[" + input + "]. " + message + "\n";
+        this.orderMenuMessage += BaseController.formatMenuMessageOption(input, message);
+    }
+
+    private void addCartItemOption(String input, String message, Consumer<Pizza> action) {
+        this.cartItemHandler.put(input, action);
+        this.cartItemMessage += BaseController.formatMenuMessageOption(input, message);
     }
 
     private void notifyIfThresholdCrossed() {
@@ -118,7 +134,7 @@ public final class CartController extends BaseController implements EventListene
     private void sendCartMenu() {
         System.out.println(this.orderMenuMessage);
         System.out.println(CartView.getCartComposition(cart));
-        System.out.println("\n[0]. Back");
+        System.out.println("\n" + BaseController.formatMenuMessageOption("0", "Back"));
     }
 
     private void handleCartInput(String input) {
@@ -131,16 +147,31 @@ public final class CartController extends BaseController implements EventListene
             this.orderMenuInputHandler.get(input).run();
             BaseController.sendAndHandleNavigationMenu();
         } else {
-            Map.Entry<Product, Integer> pizzaEntry = new ArrayList<>(this.cart.getProductQty().entrySet()).get(Integer.parseInt(input) - 1);
-            Pizza pizza = (Pizza) pizzaEntry.getKey();
-            int count = pizzaEntry.getValue();
-            System.out.println(pizza.getName() + " x " + count + " = " + pizza.getPrice() * count);
-
-            // TODO: Handle selected item
+            this.handleSelectedItem(input);
 
             this.sendCartMenu();
             this.handleInput();
         }
+    }
+
+    private void handleSelectedItem(String input) {
+        Map.Entry<Product, Integer> pizzaEntry = new ArrayList<>(this.cart.getProductQty().entrySet()).get(Integer.parseInt(input) - 1);
+        Pizza pizza = (Pizza) pizzaEntry.getKey();
+        int count = pizzaEntry.getValue();
+        System.out.println("\n" + pizza.getName() + " x " + count + " = " + pizza.getPrice() * count);
+        System.out.println(this.cartItemMessage);
+
+        String optionInput;
+        boolean isSupportedOption;
+        do {
+            optionInput = BaseController.readInput();
+            isSupportedOption = this.cartItemHandler.containsKey(optionInput);
+            if (!isSupportedOption) {
+                System.out.println("Operation is not supported: " + optionInput);
+            }
+        } while (!isSupportedOption);
+
+        this.cartItemHandler.get(optionInput).accept(pizza);
     }
 
     private void makeOrder() {
@@ -171,6 +202,33 @@ public final class CartController extends BaseController implements EventListene
         }
 
         this.resetCart();
+    }
+
+    private void handleAddCustomQty(Pizza pizza) {
+        this.add(pizza, this.getNumericalInput());
+    }
+
+    private void handleDecreaseCustomQty(Pizza pizza) {
+        this.remove(pizza, this.getNumericalInput());
+    }
+
+    private void handleSetCustomQty(Pizza pizza) {
+        this.set(pizza, this.getNumericalInput());
+    }
+
+    private int getNumericalInput() {
+        String input;
+        boolean inputIsNumber;
+
+        do {
+            input = BaseController.readInput();
+            inputIsNumber = input.matches("\\d+");
+            if (!inputIsNumber) {
+                System.out.println("Please type a number");
+            }
+        } while (!inputIsNumber);
+
+        return Integer.parseInt(input);
     }
 
     private void resetCart() {
