@@ -1,10 +1,10 @@
 package com.github.muffindud.controller;
 
 import com.github.muffindud.config.ConfigProvider;
+import com.github.muffindud.enums.Country;
 import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.factory.PizzaFactory;
-import com.github.muffindud.factory.impl.AmericanPizzaFactory;
 import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.*;
 import com.github.muffindud.publisher.EventManager;
@@ -19,26 +19,26 @@ import java.util.function.Consumer;
 
 @Slf4j
 public final class PizzaMenuController extends BaseController implements EventListener {
-    private final Map<NotificationTopic, Runnable> notificationHandler = new HashMap<>();
+    private final Map<NotificationTopic, Consumer<Object>> notificationHandler = new HashMap<>();
     private final PizzaMenu pizzaMenu;
 
     private final EventManager eventManager;
+
+    private Country country = Country.USA;
+    private PizzaFactory pizzaFactory = PizzaFactory.getFactory(this.country);
 
     public PizzaMenuController(PizzaMenu pizzaMenu, EventManager eventManager) {
         super();
 
         this.notificationHandler.put(NotificationTopic.DISCOUNT_APPLIED, this::sendDiscountApplied);
         this.notificationHandler.put(NotificationTopic.DISCOUNT_NOT_APPLIED, this::sendDiscountNotApplied);
-
-        // TODO: Remove when implementing factories
-        PizzaFactory pizzaFactory = new AmericanPizzaFactory();
-
-        pizzaMenu.getPizzas().add(pizzaFactory.createSausagePizza());
-        pizzaMenu.getPizzas().add(pizzaFactory.createVegetarianPizza());
-        pizzaMenu.getPizzas().add(pizzaFactory.createVeganPizza());
+        this.notificationHandler.put(NotificationTopic.COUNTRY_CHANGE, this::changeCountry);
 
         this.pizzaMenu = pizzaMenu;
         this.eventManager = eventManager;
+
+        // TODO: Remove when implementing factories
+        this.updatePizzaMenu();
     }
 
     private void handlePizzaMenuInput(String input) {
@@ -76,21 +76,37 @@ public final class PizzaMenuController extends BaseController implements EventLi
         return count;
     }
 
-    private void sendDiscountApplied() {
+    private void sendDiscountApplied(Object message) {
         System.out.printf("You're about to spend %.2f. You won %.2f%%\n",
                 ConfigProvider.getDiscount().discountPrice(),
                 ConfigProvider.getDiscount().discountRate() * 100);
     }
 
-    private void sendDiscountNotApplied() {
+    private void sendDiscountNotApplied(Object message) {
         System.out.printf("You're no longer over %.2f. %.2f%% discount no longer applied\n",
                 ConfigProvider.getDiscount().discountPrice(),
                 ConfigProvider.getDiscount().discountPrice() * 100);
     }
 
+    private void changeCountry(Object message) {
+        this.country = (Country) message;
+        log.info("Set country to {}", country.name());
+        this.pizzaFactory = PizzaFactory.getFactory(this.country);
+        log.info("Set pizza factory to {}", this.pizzaFactory.getClass().getName());
+        this.updatePizzaMenu();
+    }
+
+    private void updatePizzaMenu() {
+        this.pizzaMenu.getPizzas().clear();
+        this.pizzaMenu.getPizzas().add(pizzaFactory.createSausagePizza());
+        this.pizzaMenu.getPizzas().add(pizzaFactory.createVegetarianPizza());
+        this.pizzaMenu.getPizzas().add(pizzaFactory.createVeganPizza());
+        log.info("Added pizzas to the menu");
+    }
+
     @Override
     public void update(NotificationTopic topic, Object message) {
-        this.notificationHandler.get(topic).run();
+        this.notificationHandler.get(topic).accept(message);
     }
 
     @Override

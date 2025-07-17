@@ -2,14 +2,23 @@ package com.github.muffindud.controller;
 
 import com.github.muffindud.enums.Country;
 import com.github.muffindud.enums.MenuContext;
+import com.github.muffindud.enums.NotificationTopic;
+import com.github.muffindud.publisher.EventManager;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 public final class CountryController extends BaseController {
-    public CountryController() {
+    private final EventManager eventManager;
+
+    public CountryController(EventManager eventManager) {
         super();
+
+        this.eventManager = eventManager;
     }
 
     private void sendCountryMenu() {
@@ -27,6 +36,18 @@ public final class CountryController extends BaseController {
 
     private void handleCountryInput(String input) {
         // TODO: Select country (with an observer that changes the pizza factory?)
+        log.info("Received {}", input);
+
+        if (Objects.equals(input, "0")) {
+            log.info("Returning to navigation menu");
+        } else {
+            Country country = Country.values()[Integer.parseInt(input) - 1];
+            log.info("Changed country to {}", country.name());
+            eventManager.notifySubscribers(NotificationTopic.COUNTRY_CHANGE, country);
+        }
+
+        BaseController.sendNavigationMenu();
+        BaseController.handleNavigationMenuInput();
     }
 
     @Override

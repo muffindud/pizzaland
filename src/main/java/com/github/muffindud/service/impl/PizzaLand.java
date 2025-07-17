@@ -18,11 +18,12 @@ public final class PizzaLand extends BaseService {
 
     private final PizzaMenuController pizzaMenuController = new PizzaMenuController(pizzaMenu, eventManager);
     private final CartController cartController = new CartController(cart, eventManager);
-    private final CountryController countryController = new CountryController();
+    private final CountryController countryController = new CountryController(eventManager);
 
     public PizzaLand() {
         this.eventManager.subscribe(this.pizzaMenuController, NotificationTopic.DISCOUNT_APPLIED);
         this.eventManager.subscribe(this.pizzaMenuController, NotificationTopic.DISCOUNT_NOT_APPLIED);
+        this.eventManager.subscribe(this.pizzaMenuController, NotificationTopic.COUNTRY_CHANGE);
         this.eventManager.subscribe(this.cartController, NotificationTopic.CART_ITEM_ADDED);
         this.eventManager.subscribe(this.cartController, NotificationTopic.CART_ITEM_REMOVED);
     }
