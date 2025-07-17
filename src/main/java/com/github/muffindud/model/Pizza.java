@@ -36,7 +36,7 @@ public final class Pizza extends Product {
 
     @Override
     public float getPrice() {
-        return this.price
+        return this.basePrice
                 + baseQty.getLeft().getPrice() * baseQty.getRight()
                 + sauceQty.getLeft().getPrice() * sauceQty.getRight()
                 + toppingsQty.entrySet().stream()
