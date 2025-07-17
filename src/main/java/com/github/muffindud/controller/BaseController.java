@@ -29,6 +29,7 @@ public abstract class BaseController {
         String input;
         boolean operationPermitted;
         do {
+            System.out.print("Selection: ");
             input = BaseController.readInput();
             operationPermitted = this.isOperationPermitted(input);
             if (!operationPermitted) {
@@ -44,6 +45,7 @@ public abstract class BaseController {
      * Reruns if the key is not defined
      */
     private static void handleNavigationMenuInput() {
+        System.out.print("Selection: ");
         BaseController.navigationMenu.getOrDefault(BaseController.readInput(), () -> {
             System.out.println("The key is no defined");
             BaseController.handleNavigationMenuInput();
@@ -61,6 +63,7 @@ public abstract class BaseController {
     static {
         BaseController.navigationMenu.put("0", () -> {
             log.info("Exiting...");
+            System.out.println("Goodbye!");
             System.exit(0);
         });
         BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption("0", "Exit");
