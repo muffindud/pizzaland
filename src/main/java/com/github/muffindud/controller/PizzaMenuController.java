@@ -9,7 +9,9 @@ import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.*;
 import com.github.muffindud.publisher.EventManager;
 import com.github.muffindud.utils.PizzaMessage;
+import com.github.muffindud.view.IngredientView;
 import com.github.muffindud.view.PizzaMenuView;
+import com.github.muffindud.view.PizzaView;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
         Pizza pizza = this.pizzaMenu.getPizzas().get(pizzaSelection);
 
         // TODO: Add ingredient list and price
+        System.out.println(PizzaView.getPizzaInfo(pizza, IngredientView::getIngredientUnitPrice));
 
         int count = promptForCount();
 
