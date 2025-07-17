@@ -45,7 +45,6 @@ public final class PizzaMenuController extends BaseController implements EventLi
     private void handlePizzaSelect(int pizzaSelection) {
         Pizza pizza = this.pizzaMenu.getPizzas().get(pizzaSelection);
 
-        // TODO: Add ingredient list and price
         System.out.println(PizzaView.getPizzaInfo(pizza, IngredientView::getIngredientUnitPrice));
 
         int count = promptForCount();

@@ -16,7 +16,7 @@ public final class PizzaView {
                 pizza.getToppingsQty().entrySet().stream()
                         .map(toppingQty ->
                                 "Topping: " + ingredientView.apply(toppingQty.getKey()) +
-                                "    Quantity: " + toppingQty.getValue() + "\n"
+                                "   Quantity: " + toppingQty.getValue() + "\n"
                         )
                         .collect(Collectors.joining());
     }
