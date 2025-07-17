@@ -56,6 +56,8 @@ public abstract class BaseController {
      * Send the navigation menu and handle the input
      */
     public static void sendAndHandleNavigationMenu() {
+        BaseController.sendDelimiter();
+        System.out.println("Select your option:");
         System.out.println(BaseController.navigationMenuMessage);
         BaseController.handleNavigationMenuInput();
     }
@@ -63,7 +65,7 @@ public abstract class BaseController {
     static {
         BaseController.navigationMenu.put("0", () -> {
             log.info("Exiting...");
-            System.out.println("Goodbye!");
+            System.out.println("\nGoodbye!");
             System.exit(0);
         });
         BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption("0", "Exit");
@@ -118,11 +120,32 @@ public abstract class BaseController {
         return "[" + input + "]. " + message + "\n";
     }
 
+    public static int getNonNegativeNumericalInput() {
+        String input;
+        boolean inputIsNumber;
+
+        do {
+            System.out.print("Count: ");
+            input = BaseController.readInput();
+            inputIsNumber = input.matches("\\d+");
+            if (!inputIsNumber) {
+                System.out.println("Please type a positive integer number");
+            }
+        } while (!inputIsNumber);
+
+        return Integer.parseInt(input);
+    }
+
+    public static void sendDelimiter() {
+        System.out.println("================================================================");
+    }
+
     BaseController() {
         BaseController.inputHandler.put(this.contextName(), this.contextInputHandler());
         log.info("Added handler for \"{}\"", this.contextName());
 
         BaseController.navigationMenu.put(this.actionKey(), () -> {
+            BaseController.sendDelimiter();
             this.action().run();
             this.handleInput();
         });

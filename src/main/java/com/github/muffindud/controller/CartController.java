@@ -205,30 +205,15 @@ public final class CartController extends BaseController implements EventListene
     }
 
     private void handleAddCustomQty(Pizza pizza) {
-        this.add(pizza, this.getNumericalInput());
+        this.add(pizza, BaseController.getNonNegativeNumericalInput());
     }
 
     private void handleDecreaseCustomQty(Pizza pizza) {
-        this.remove(pizza, this.getNumericalInput());
+        this.remove(pizza, BaseController.getNonNegativeNumericalInput());
     }
 
     private void handleSetCustomQty(Pizza pizza) {
-        this.set(pizza, this.getNumericalInput());
-    }
-
-    private int getNumericalInput() {
-        String input;
-        boolean inputIsNumber;
-
-        do {
-            input = BaseController.readInput();
-            inputIsNumber = input.matches("\\d+");
-            if (!inputIsNumber) {
-                System.out.println("Please type a number");
-            }
-        } while (!inputIsNumber);
-
-        return Integer.parseInt(input);
+        this.set(pizza, BaseController.getNonNegativeNumericalInput());
     }
 
     private void resetCart() {

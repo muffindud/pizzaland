@@ -47,10 +47,10 @@ public final class PizzaMenuController extends BaseController implements EventLi
 
         System.out.println(PizzaView.getPizzaInfo(pizza, IngredientView::getIngredientUnitPrice));
 
-        int count = promptForCount();
+        int count = BaseController.getNonNegativeNumericalInput();
 
         this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, count));
-        System.out.println("Added " + count + " x " + pizza.getName());
+        System.out.println("\nAdded " + count + " x " + pizza.getName());
 
         this.sendPizzaMenuMenu();
         this.handleInput();
@@ -69,16 +69,9 @@ public final class PizzaMenuController extends BaseController implements EventLi
 
     private void sendPizzaMenuMenu() {
         log.info("Sending pizza menu");
+        System.out.println("Menu:");
         System.out.println(PizzaMenuView.getMenu(this.pizzaMenu));
-        System.out.println("[0]. Back");
-    }
-
-    private int promptForCount() {
-        System.out.print("Count: ");
-        int count = Integer.parseInt(BaseController.readInput());
-        System.out.println();
-
-        return count;
+        System.out.println(BaseController.formatMenuMessageOption("0", "Back"));
     }
 
     private void sendDiscountApplied(Object message) {
