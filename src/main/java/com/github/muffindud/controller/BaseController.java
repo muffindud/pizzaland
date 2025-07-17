@@ -26,25 +26,36 @@ public abstract class BaseController {
      * Execute the function for the current context passing the input from the console
      */
     public void handleInput() {
-        BaseController.inputHandler.get(this.contextName()).accept(BaseController.readInput());
-    }
+        String input;
+        boolean operationPermitted = true;
+        do {
+            input = BaseController.readInput();
+            operationPermitted = this.isOperationPermitted(input);
+            if (!operationPermitted) {
+                System.out.println("The operation is not permitted: " + input);
+            }
+        } while (!operationPermitted);
 
-    /**
-     * Print the navigation menu with the keys and names to the endpoints
-     */
-    public static void sendNavigationMenu() {
-        System.out.println(BaseController.navigationMenuMessage);
+        BaseController.inputHandler.get(this.contextName()).accept(input);
     }
 
     /**
      * Execute the respective endpoint at the specified key.
      * Reruns if the key is not defined
      */
-    public static void handleNavigationMenuInput() {
+    private static void handleNavigationMenuInput() {
         BaseController.navigationMenu.getOrDefault(BaseController.readInput(), () -> {
             System.out.println("The key is no defined");
             BaseController.handleNavigationMenuInput();
         }).run();
+    }
+
+    /**
+     * Send the navigation menu and handle the input
+     */
+    public static void sendAndHandleNavigationMenu() {
+        System.out.println(BaseController.navigationMenuMessage);
+        BaseController.handleNavigationMenuInput();
     }
 
     static {
@@ -91,6 +102,14 @@ public abstract class BaseController {
      * @return endpoint method
      */
     protected abstract Runnable action();
+
+    /**
+     * Checker for the input handler to verify if the input is a supported operation
+     *
+     * @param input to check
+     * @return `true` if operation is supported, `false` if otherwise
+     */
+    protected abstract boolean isOperationPermitted(String input);
 
     BaseController() {
         BaseController.inputHandler.put(this.contextName(), this.contextInputHandler());

@@ -37,8 +37,21 @@ public final class PizzaMenuController extends BaseController implements EventLi
         this.pizzaMenu = pizzaMenu;
         this.eventManager = eventManager;
 
-        // TODO: Remove when implementing factories
         this.updatePizzaMenu();
+    }
+
+    private void handlePizzaSelect(int pizzaSelection) {
+        Pizza pizza = this.pizzaMenu.getPizzas().get(pizzaSelection);
+
+        // TODO: Add ingredient list and price
+
+        int count = promptForCount();
+
+        this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, count));
+        System.out.println("Added " + count + " x " + pizza.getName());
+
+        this.sendPizzaMenuMenu();
+        this.handleInput();
     }
 
     private void handlePizzaMenuInput(String input) {
@@ -46,20 +59,10 @@ public final class PizzaMenuController extends BaseController implements EventLi
 
         if (Objects.equals(input, "0")) {
             log.info("Returning to navigation menu");
-            BaseController.sendNavigationMenu();
-            BaseController.handleNavigationMenuInput();
+            BaseController.sendAndHandleNavigationMenu();
         } else {
-            Pizza pizza = this.pizzaMenu.getPizzas().get(Integer.parseInt(input) - 1);
-            int count = promptForCount();
-
-            this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, count));
-            System.out.println("Added " + count + " x " + pizza.getName());
-
-            this.sendPizzaMenuMenu();
-            this.handleInput();
+            handlePizzaSelect(Integer.parseInt(input) - 1);
         }
-
-        // TODO: Add the selected pizza to cart (perhaps observer with cart as listener?)
     }
 
     private void sendPizzaMenuMenu() {
@@ -77,7 +80,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
     }
 
     private void sendDiscountApplied(Object message) {
-        System.out.printf("You're about to spend %.2f. You won %.2f%%\n",
+        System.out.printf("You're about to spend %.2f. You won %.2f%% discount\n",
                 ConfigProvider.getDiscount().discountPrice(),
                 ConfigProvider.getDiscount().discountRate() * 100);
     }
@@ -127,6 +130,19 @@ public final class PizzaMenuController extends BaseController implements EventLi
     @Override
     protected Runnable action() {
         return this::sendPizzaMenuMenu;
+    }
+
+    @Override
+    protected boolean isOperationPermitted(String input) {
+        boolean operationPermitted;
+        try {
+            int selection = Integer.parseInt(input);
+            operationPermitted = this.pizzaMenu.getPizzas().size() >= selection;
+        } catch (NumberFormatException e) {
+            operationPermitted = false;
+        }
+
+        return operationPermitted;
     }
 
     @Override

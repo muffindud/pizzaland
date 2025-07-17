@@ -12,7 +12,6 @@ public abstract class BaseService {
         try (Scanner s = new Scanner(System.in)) {
             BaseController.setScanner(s);
             this.entrypoint();
-            BaseController.handleNavigationMenuInput();
             // TODO: Add logic continuation
         }
     }

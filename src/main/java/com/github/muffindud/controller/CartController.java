@@ -97,8 +97,7 @@ public final class CartController extends BaseController implements EventListene
 
         if (Objects.equals(input, "0")) {
             log.info("Returning to navigation menu");
-            BaseController.sendNavigationMenu();
-            BaseController.handleNavigationMenuInput();
+            BaseController.sendAndHandleNavigationMenu();
         } else {
             Map.Entry<Product, Integer> pizzaEntry = new ArrayList<>(this.cart.getProductQty().entrySet()).get(Integer.parseInt(input) - 1);
             Pizza pizza = (Pizza) pizzaEntry.getKey();
@@ -133,6 +132,20 @@ public final class CartController extends BaseController implements EventListene
     @Override
     protected Runnable action() {
         return this::sendCartMenu;
+    }
+
+    @Override
+    protected boolean isOperationPermitted(String input) {
+        boolean operationPermitted;
+        try {
+            int selection = Integer.parseInt(input);
+            // TODO: Add checks for other operations once implemented (clear cart, checkout etc.)
+            operationPermitted = this.cart.getProductQty().size() >= selection;
+        } catch (NumberFormatException e) {
+            operationPermitted = false;
+        }
+
+        return operationPermitted;
     }
 
     @Override

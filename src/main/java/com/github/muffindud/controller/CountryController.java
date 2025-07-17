@@ -46,8 +46,7 @@ public final class CountryController extends BaseController {
             eventManager.notifySubscribers(NotificationTopic.COUNTRY_CHANGE, country);
         }
 
-        BaseController.sendNavigationMenu();
-        BaseController.handleNavigationMenuInput();
+        BaseController.sendAndHandleNavigationMenu();
     }
 
     @Override
@@ -73,5 +72,18 @@ public final class CountryController extends BaseController {
     @Override
     protected Runnable action() {
         return this::sendCountryMenu;
+    }
+
+    @Override
+    protected boolean isOperationPermitted(String input) {
+        boolean operationPermitted;
+        try {
+            int selection = Integer.parseInt(input);
+            operationPermitted = Country.values().length >= selection;
+        } catch (NumberFormatException e) {
+            operationPermitted = false;
+        }
+
+        return operationPermitted;
     }
 }

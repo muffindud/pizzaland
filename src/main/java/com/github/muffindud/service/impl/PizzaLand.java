@@ -30,6 +30,6 @@ public final class PizzaLand extends BaseService {
 
     @Override
     protected void entrypoint() {
-        BaseController.sendNavigationMenu();
+        BaseController.sendAndHandleNavigationMenu();
     }
 }
