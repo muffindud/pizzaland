@@ -12,7 +12,6 @@ public abstract class BaseService {
         try (Scanner s = new Scanner(System.in)) {
             BaseController.setScanner(s);
             this.entrypoint();
-            // TODO: Add logic continuation
         }
     }
 

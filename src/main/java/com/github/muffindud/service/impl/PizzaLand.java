@@ -26,6 +26,7 @@ public final class PizzaLand extends BaseService {
         this.eventManager.subscribe(this.pizzaMenuController, NotificationTopic.COUNTRY_CHANGE);
         this.eventManager.subscribe(this.cartController, NotificationTopic.CART_ITEM_ADDED);
         this.eventManager.subscribe(this.cartController, NotificationTopic.CART_ITEM_REMOVED);
+        this.eventManager.subscribe(this.cartController, NotificationTopic.CART_ITEM_SET);
     }
 
     @Override

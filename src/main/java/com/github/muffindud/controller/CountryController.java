@@ -35,7 +35,6 @@ public final class CountryController extends BaseController {
     }
 
     private void handleCountryInput(String input) {
-        // TODO: Select country (with an observer that changes the pizza factory?)
         log.info("Received {}", input);
 
         if (Objects.equals(input, "0")) {

@@ -5,5 +5,5 @@ public enum NotificationTopic {
     DISCOUNT_NOT_APPLIED,
     CART_ITEM_ADDED,
     CART_ITEM_REMOVED,
-    COUNTRY_CHANGE,
+    COUNTRY_CHANGE, CART_ITEM_SET,
 }
