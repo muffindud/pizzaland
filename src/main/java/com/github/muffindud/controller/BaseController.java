@@ -20,7 +20,8 @@ public abstract class BaseController {
     }
 
     /**
-     * Execute the function for the current context passing the input from the console
+     * Execute the function for the current context passing the input from the console and constraining within the rules
+     * declared in `isOperationPermitted`
      */
     public void handleInput() {
         String input;
@@ -69,7 +70,9 @@ public abstract class BaseController {
     }
 
     /**
-     * TODO
+     * Handle the input received in the contexts the function is overridden in
+     *
+     * @param input the passed String from the user, should be validated using `isOperationPermitted`
      */
     protected abstract void contextInputHandler(String input);
 
@@ -88,8 +91,7 @@ public abstract class BaseController {
     protected abstract String actionName();
 
     /**
-     * The method that will be run upon accessing the respective endpoint key.
-     * Should have menu print with key handler
+     * Send the formated message for the menu contexts it's overridden for
      */
     protected abstract void sendMenuMessage();
 
@@ -101,15 +103,30 @@ public abstract class BaseController {
      */
     protected abstract boolean isOperationPermitted(String input);
 
+    /**
+     * Format the endpoint and message for printing to the screen
+     *
+     * @param input endpoint key
+     * @param message endpoint message
+     * @return formated string row
+     */
     public static String formatMenuMessageOption(String input, String message) {
         return "[" + input + "]. " + message + "\n";
     }
 
+    /**
+     * Send the context specific menu message and listen for the user input
+     */
     protected void sendMenuAndHandleInput() {
         this.sendMenuMessage();
         this.handleInput();
     }
 
+    /**
+     * Get the user input that is enforced to be an int
+     *
+     * @return user input as an integer number
+     */
     public static int getNonNegativeNumericalInput() {
         String input;
         boolean inputIsNumber;
