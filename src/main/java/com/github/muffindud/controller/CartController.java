@@ -165,8 +165,13 @@ public final class CartController extends BaseController implements EventListene
 
     private void makeOrder() {
         OrderDto order = OrderDao.createOrder(this.cart);
-        // TODO: Split the function
+        String json = CartController.makeJson(order);
+        File file = CartController.createFile("order_" + UUID.randomUUID() + ".json");
+        CartController.writeToFile(file, json);
+        this.resetCart();
+    }
 
+    private static String makeJson(OrderDto order) {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json;
         try {
@@ -175,7 +180,11 @@ public final class CartController extends BaseController implements EventListene
             throw new RuntimeException(e);
         }
 
-        File file = new File("order_" + UUID.randomUUID() + ".json");
+        return json;
+    }
+
+    private static File createFile(String name) {
+        File file = new File(name);
         try {
             file.createNewFile();
             log.info("Created file {}", file.getName());
@@ -183,15 +192,17 @@ public final class CartController extends BaseController implements EventListene
             throw new RuntimeException(e);
         }
 
+        return file;
+    }
+
+    private static void writeToFile(File file, String content) {
         try {
             FileWriter fileWriter = new FileWriter(file.getName());
-            fileWriter.write(json);
+            fileWriter.write(content);
             fileWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        this.resetCart();
     }
 
     private void handleAddCustomQty(Pizza pizza) {
