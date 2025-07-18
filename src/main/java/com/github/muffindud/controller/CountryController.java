@@ -3,11 +3,10 @@ package com.github.muffindud.controller;
 import com.github.muffindud.enums.Country;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.publisher.EventManager;
+import com.github.muffindud.view.CountryView;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Slf4j
 public final class CountryController extends BaseController {
@@ -46,17 +45,7 @@ public final class CountryController extends BaseController {
 
     @Override
     protected void sendMenuMessage() {
-        // TODO: Use CountryView here
-        String message = "Select country:\n"
-                + IntStream.range(1, Country.values().length + 1)
-                .mapToObj(i -> {
-                    Country country = Country.values()[i - 1];
-                    return "[" + i + "]. " + country.name() + "\n";
-                })
-                .collect(Collectors.joining())
-                + "\n[0]. Back\n";
-
-        System.out.println(message);
+        System.out.println(CountryView.getCountryMenuView());
     }
 
     @Override
