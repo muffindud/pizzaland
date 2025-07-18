@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.dao.OrderDao;
 import com.github.muffindud.dto.OrderDto;
-import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.listener.EventListener;
 import com.github.muffindud.model.Cart;
@@ -131,29 +130,6 @@ public final class CartController extends BaseController implements EventListene
         this.notifyIfThresholdCrossed();
     }
 
-    private void sendCartMenu() {
-        System.out.println(this.orderMenuMessage);
-        System.out.println(CartView.getCartComposition(cart));
-        System.out.println("\n" + BaseController.formatMenuMessageOption("0", "Back"));
-    }
-
-    private void handleCartInput(String input) {
-        log.info("Received {}", input);
-
-        if (Objects.equals(input, "0")) {
-            log.info("Returning to navigation menu");
-            BaseController.sendAndHandleNavigationMenu();
-        } else if (this.orderMenuInputHandler.containsKey(input)) {
-            this.orderMenuInputHandler.get(input).run();
-            BaseController.sendAndHandleNavigationMenu();
-        } else {
-            this.handleSelectedItem(input);
-
-            this.sendCartMenu();
-            this.handleInput();
-        }
-    }
-
     private void handleSelectedItem(String input) {
         Map.Entry<Product, Integer> pizzaEntry = new ArrayList<>(this.cart.getProductQty().entrySet()).get(Integer.parseInt(input) - 1);
         Pizza pizza = (Pizza) pizzaEntry.getKey();
@@ -222,13 +198,20 @@ public final class CartController extends BaseController implements EventListene
     }
 
     @Override
-    protected MenuContext contextName() {
-        return MenuContext.CART;
-    }
+    protected void contextInputHandler(String input) {
+        log.info("Received {}", input);
 
-    @Override
-    protected Consumer<String> contextInputHandler() {
-        return this::handleCartInput;
+        if (Objects.equals(input, "0")) {
+            log.info("Returning to navigation menu");
+            BaseController.sendAndHandleNavigationMenu();
+        } else if (this.orderMenuInputHandler.containsKey(input)) {
+            this.orderMenuInputHandler.get(input).run();
+            BaseController.sendAndHandleNavigationMenu();
+        } else {
+            this.handleSelectedItem(input);
+
+            this.sendMenuAndHandleInput();
+        }
     }
 
     @Override
@@ -242,8 +225,10 @@ public final class CartController extends BaseController implements EventListene
     }
 
     @Override
-    protected Runnable action() {
-        return this::sendCartMenu;
+    protected void sendMenuMessage() {
+        System.out.println(this.orderMenuMessage);
+        System.out.println(CartView.getCartComposition(cart));
+        System.out.println("\n" + BaseController.formatMenuMessageOption("0", "Back"));
     }
 
     @Override

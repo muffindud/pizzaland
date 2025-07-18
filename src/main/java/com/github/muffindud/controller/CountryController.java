@@ -1,13 +1,11 @@
 package com.github.muffindud.controller;
 
 import com.github.muffindud.enums.Country;
-import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.publisher.EventManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -21,20 +19,8 @@ public final class CountryController extends BaseController {
         this.eventManager = eventManager;
     }
 
-    private void sendCountryMenu() {
-        String message = "Select country:\n"
-                + IntStream.range(1, Country.values().length + 1)
-                        .mapToObj(i -> {
-                            Country country = Country.values()[i - 1];
-                            return "[" + i + "]. " + country.name() + "\n";
-                        })
-                        .collect(Collectors.joining())
-                + "\n[0]. Back\n";
-
-        System.out.println(message);
-    }
-
-    private void handleCountryInput(String input) {
+    @Override
+    protected void contextInputHandler(String input) {
         log.info("Received {}", input);
 
         if (Objects.equals(input, "0")) {
@@ -49,16 +35,6 @@ public final class CountryController extends BaseController {
     }
 
     @Override
-    protected MenuContext contextName() {
-        return MenuContext.COUNTRY_SELECTOR;
-    }
-
-    @Override
-    protected Consumer<String> contextInputHandler() {
-        return this::handleCountryInput;
-    }
-
-    @Override
     protected String actionKey() {
         return "3";
     }
@@ -69,8 +45,18 @@ public final class CountryController extends BaseController {
     }
 
     @Override
-    protected Runnable action() {
-        return this::sendCountryMenu;
+    protected void sendMenuMessage() {
+        // TODO: Use CountryView here
+        String message = "Select country:\n"
+                + IntStream.range(1, Country.values().length + 1)
+                .mapToObj(i -> {
+                    Country country = Country.values()[i - 1];
+                    return "[" + i + "]. " + country.name() + "\n";
+                })
+                .collect(Collectors.joining())
+                + "\n[0]. Back\n";
+
+        System.out.println(message);
     }
 
     @Override

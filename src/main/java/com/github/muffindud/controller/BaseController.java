@@ -1,6 +1,5 @@
 package com.github.muffindud.controller;
 
-import com.github.muffindud.enums.MenuContext;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -8,13 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.function.Consumer;
 
 @Slf4j
 public abstract class BaseController {
     @Getter @Setter private static Scanner scanner;
 
-    private final static Map<MenuContext, Consumer<String>> inputHandler = new HashMap<>();
     private final static Map<String, Runnable> navigationMenu = new HashMap<>();
     private static String navigationMenuMessage = "";
 
@@ -37,7 +34,7 @@ public abstract class BaseController {
             }
         } while (!operationPermitted);
 
-        BaseController.inputHandler.get(this.contextName()).accept(input);
+        this.contextInputHandler(input);
     }
 
     /**
@@ -72,19 +69,9 @@ public abstract class BaseController {
     }
 
     /**
-     * The context in which the input should be handled
-     *
-     * @return context
+     * TODO
      */
-    protected abstract MenuContext contextName();
-
-    /**
-     * The consumer function which will be executed in it's defined context.
-     * The function takes as parameter the input from the console
-     *
-     * @return function with one String parameter
-     */
-    protected abstract Consumer<String> contextInputHandler();
+    protected abstract void contextInputHandler(String input);
 
     /**
      * The endpoint key which is used to access the context from the navigation menu
@@ -103,10 +90,8 @@ public abstract class BaseController {
     /**
      * The method that will be run upon accessing the respective endpoint key.
      * Should have menu print with key handler
-     *
-     * @return endpoint method
      */
-    protected abstract Runnable action();
+    protected abstract void sendMenuMessage();
 
     /**
      * Checker for the input handler to verify if the input is a supported operation
@@ -118,6 +103,11 @@ public abstract class BaseController {
 
     public static String formatMenuMessageOption(String input, String message) {
         return "[" + input + "]. " + message + "\n";
+    }
+
+    protected void sendMenuAndHandleInput() {
+        this.sendMenuMessage();
+        this.handleInput();
     }
 
     public static int getNonNegativeNumericalInput() {
@@ -141,13 +131,9 @@ public abstract class BaseController {
     }
 
     BaseController() {
-        BaseController.inputHandler.put(this.contextName(), this.contextInputHandler());
-        log.info("Added handler for \"{}\"", this.contextName());
-
         BaseController.navigationMenu.put(this.actionKey(), () -> {
             BaseController.sendDelimiter();
-            this.action().run();
-            this.handleInput();
+            this.sendMenuAndHandleInput();
         });
         BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption(this.actionKey(), this.actionName());
         log.info("Added \"{}\" action with key \"{}\"", this.actionName(), this.actionKey());

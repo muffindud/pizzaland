@@ -2,7 +2,6 @@ package com.github.muffindud.controller;
 
 import com.github.muffindud.config.ConfigProvider;
 import com.github.muffindud.enums.Country;
-import com.github.muffindud.enums.MenuContext;
 import com.github.muffindud.enums.NotificationTopic;
 import com.github.muffindud.factory.PizzaFactory;
 import com.github.muffindud.listener.EventListener;
@@ -52,26 +51,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
         this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, count));
         System.out.println("\nAdded " + count + " x " + pizza.getName());
 
-        this.sendPizzaMenuMenu();
-        this.handleInput();
-    }
-
-    private void handlePizzaMenuInput(String input) {
-        log.info("Received {}", input);
-
-        if (Objects.equals(input, "0")) {
-            log.info("Returning to navigation menu");
-            BaseController.sendAndHandleNavigationMenu();
-        } else {
-            handlePizzaSelect(Integer.parseInt(input) - 1);
-        }
-    }
-
-    private void sendPizzaMenuMenu() {
-        log.info("Sending pizza menu");
-        System.out.println("Menu:");
-        System.out.println(PizzaMenuView.getMenu(this.pizzaMenu));
-        System.out.println(BaseController.formatMenuMessageOption("0", "Back"));
+        this.sendMenuAndHandleInput();
     }
 
     private void sendDiscountApplied(Object message) {
@@ -108,8 +88,15 @@ public final class PizzaMenuController extends BaseController implements EventLi
     }
 
     @Override
-    protected Consumer<String> contextInputHandler() {
-        return this::handlePizzaMenuInput;
+    protected void contextInputHandler(String input) {
+        log.info("Received {}", input);
+
+        if (Objects.equals(input, "0")) {
+            log.info("Returning to navigation menu");
+            BaseController.sendAndHandleNavigationMenu();
+        } else {
+            handlePizzaSelect(Integer.parseInt(input) - 1);
+        }
     }
 
     @Override
@@ -123,8 +110,11 @@ public final class PizzaMenuController extends BaseController implements EventLi
     }
 
     @Override
-    protected Runnable action() {
-        return this::sendPizzaMenuMenu;
+    protected void sendMenuMessage() {
+        log.info("Sending pizza menu");
+        System.out.println("Menu:");
+        System.out.println(PizzaMenuView.getMenu(this.pizzaMenu));
+        System.out.println(BaseController.formatMenuMessageOption("0", "Back"));
     }
 
     @Override
@@ -138,10 +128,5 @@ public final class PizzaMenuController extends BaseController implements EventLi
         }
 
         return operationPermitted;
-    }
-
-    @Override
-    protected MenuContext contextName() {
-        return MenuContext.PIZZA_MENU;
     }
 }
