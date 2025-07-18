@@ -12,10 +12,8 @@ public final class EventManager {
     private final ConcurrentMap<NotificationTopic, Set<EventListener>> listeners =
             new ConcurrentHashMap<>();
 
-    public EventManager() {
-        for (NotificationTopic topic : NotificationTopic.values()) {
-            this.listeners.put(topic, new HashSet<>());
-        }
+    private boolean isTopicPresent(NotificationTopic topic) {
+        return this.listeners.containsKey(topic);
     }
 
     /**
@@ -25,6 +23,9 @@ public final class EventManager {
      * @param topic to subscribe the listener to
      */
     public void subscribe(EventListener listener, NotificationTopic topic) {
+        if (!this.isTopicPresent(topic)) {
+            this.listeners.put(topic, new HashSet<>());
+        }
         this.listeners.get(topic).add(listener);
     }
 
@@ -34,7 +35,6 @@ public final class EventManager {
      * @param listener to unsubscribe
      * @param topic to unsubscribe the listener from
      */
-
     public void unsubscribe(EventListener listener, NotificationTopic topic) {
         this.listeners.get(topic).remove(listener);
     }
@@ -46,8 +46,10 @@ public final class EventManager {
      * @param message to pass along
      */
     public void notifySubscribers(NotificationTopic topic, Object message) {
-        for (EventListener listener : this.listeners.get(topic)) {
-            listener.update(topic, message);
+        if (this.isTopicPresent(topic)) {
+            for (EventListener listener : this.listeners.get(topic)) {
+                listener.update(topic, message);
+            }
         }
     }
 }
