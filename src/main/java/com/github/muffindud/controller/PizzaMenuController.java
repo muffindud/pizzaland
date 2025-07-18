@@ -46,7 +46,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
 
         System.out.println(PizzaView.getPizzaInfo(pizza, IngredientView::getIngredientUnitPrice));
 
-        int count = BaseController.getNonNegativeNumericalInput();
+        int count = BaseController.getNonNegativeIntegerInput();
 
         this.eventManager.notifySubscribers(NotificationTopic.CART_ITEM_ADDED, new PizzaMessage(pizza, count));
         System.out.println("\nAdded " + count + " x " + pizza.getName());

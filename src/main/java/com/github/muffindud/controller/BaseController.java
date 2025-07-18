@@ -1,20 +1,26 @@
 package com.github.muffindud.controller;
 
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Slf4j
 public abstract class BaseController {
-    @Getter @Setter private static Scanner scanner;
+    // Should be passed from the service
+    @Setter private static Scanner scanner;
 
     private final static Map<String, Runnable> navigationMenu = new HashMap<>();
     private static String navigationMenuMessage = "";
 
+    /**
+     * Read the input from the console screen
+     *
+     * @return user input
+     */
     protected static String readInput() {
         return BaseController.scanner.nextLine();
     }
@@ -24,18 +30,12 @@ public abstract class BaseController {
      * declared in `isOperationPermitted`
      */
     public void handleInput() {
-        String input;
-        boolean operationPermitted;
-        do {
-            System.out.print("Selection: ");
-            input = BaseController.readInput();
-            operationPermitted = this.isOperationPermitted(input);
-            if (!operationPermitted) {
-                System.out.println("The operation is not permitted: " + input);
-            }
-        } while (!operationPermitted);
-
-        this.contextInputHandler(input);
+        BaseController.runWithInputCheck(
+                this::isOperationPermitted,
+                "Selection: ",
+                "The operation is not permitted",
+                this::contextInputHandler
+        );
     }
 
     /**
@@ -44,6 +44,8 @@ public abstract class BaseController {
      */
     private static void handleNavigationMenuInput() {
         System.out.print("Selection: ");
+
+        // Go to the selected menu (if it exists and it's declared)
         BaseController.navigationMenu.getOrDefault(BaseController.readInput(), () -> {
             System.out.println("The key is no defined");
             BaseController.handleNavigationMenuInput();
@@ -61,6 +63,7 @@ public abstract class BaseController {
     }
 
     static {
+        // Add an exit endpoint and message
         BaseController.navigationMenu.put("0", () -> {
             log.info("Exiting...");
             System.out.println("\nGoodbye!");
@@ -104,7 +107,8 @@ public abstract class BaseController {
     protected abstract boolean isOperationPermitted(String input);
 
     /**
-     * Format the endpoint and message for printing to the screen
+     * Format the endpoint and message for printing to the screen.
+     * Used when handling the input within the overridden context
      *
      * @param input endpoint key
      * @param message endpoint message
@@ -127,20 +131,47 @@ public abstract class BaseController {
      *
      * @return user input as an integer number
      */
-    public static int getNonNegativeNumericalInput() {
+    public static int getNonNegativeIntegerInput() {
+        AtomicReference<Integer> result = new AtomicReference<>();
+        BaseController.runWithInputCheck(
+                input -> input.matches("\\d+"),
+                "Count: ",
+                "Please type a positive integer number",
+                input -> result.set(Integer.parseInt(input))
+        );
+        return result.get();
+    }
+
+    /**
+     * Run the `methodToRun` function with the user input as parameter.
+     * The user input is checked using the Predicate `checker` executed on the user input.
+     * When reading the input `promptMessage` is displayed to the screen.
+     * If the input is not valid `errorMessage` is displayed and the user is prompted again.
+     *
+     * @param checker predicate function to check the user input
+     * @param promptMessage to display before reading the input
+     * @param errorMessage to display if the input is not valid
+     * @param methodToRun to run with the validated user input
+     */
+    public static void runWithInputCheck(
+            Predicate<String> checker,
+            String promptMessage,
+            String errorMessage,
+            Consumer<String> methodToRun
+    ) {
         String input;
-        boolean inputIsNumber;
+        boolean inputValid;
 
         do {
-            System.out.print("Count: ");
+            System.out.print(promptMessage);
             input = BaseController.readInput();
-            inputIsNumber = input.matches("\\d+");
-            if (!inputIsNumber) {
-                System.out.println("Please type a positive integer number");
+            inputValid = checker.test(input);
+            if (!inputValid) {
+                System.out.println(errorMessage);
             }
-        } while (!inputIsNumber);
+        } while (!inputValid);
 
-        return Integer.parseInt(input);
+        methodToRun.accept(input);
     }
 
     public static void sendDelimiter() {
@@ -148,10 +179,13 @@ public abstract class BaseController {
     }
 
     BaseController() {
+        // Add the endpoint key and call to handle within the overridden context
         BaseController.navigationMenu.put(this.actionKey(), () -> {
             BaseController.sendDelimiter();
             this.sendMenuAndHandleInput();
         });
+
+        // Format the navigation message menu to add all the endpoints from the navigaion menu
         BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption(this.actionKey(), this.actionName());
         log.info("Added \"{}\" action with key \"{}\"", this.actionName(), this.actionKey());
     }

@@ -24,30 +24,38 @@ import java.util.function.Consumer;
 
 @Slf4j
 public final class CartController extends BaseController implements EventListener {
+    // Hold the consumer for each subscribed topic
     private final Map<NotificationTopic, Consumer<Object>> notificationHandler = new HashMap<>();
 
+    // Hold the endpoints to the actions within the cart
     private final Map<String, Runnable> orderMenuInputHandler = new HashMap<>();
     private String orderMenuMessage = "";
 
+    // Hold the endpoints for manipulating a specified item in the cart
     private final Map<String, Consumer<Pizza>> cartItemHandler = new HashMap<>();
     private String cartItemMessage = "";
 
+    // State to check if the discount threshold before checking the total price
+    private boolean thresholdOver = false;
+
     private final Cart cart;
     private final EventManager eventManager;
-    private boolean thresholdOver = false;
 
     private static final float DISCOUNT_PRICE = ConfigProvider.getDiscount().discountPrice();
 
     public CartController(Cart cart, EventManager eventManager) {
         super();
 
+        // Declare the consumers that will run for the specified topics
         this.notificationHandler.put(NotificationTopic.CART_ITEM_ADDED, this::handlePizzaAdd);
         this.notificationHandler.put(NotificationTopic.CART_ITEM_REMOVED, this::handlePizzaRemove);
         this.notificationHandler.put(NotificationTopic.CART_ITEM_SET, this::handlePizzaCountSet);
 
+        // Declare the endpoints for the cart options
         this.addOrderMenuInput("O", "Create Order", this::makeOrder);
         this.addOrderMenuInput("C", "Clear Cart", this::empty);
 
+        // Declare the endpoints for the item manipulation options
         this.addCartItemOption("R", "Remove all", this::removeAll);
         this.addCartItemOption("A", "Add custom quantity", this::handleAddCustomQty);
         this.addCartItemOption("+", "Add one", this::add);
@@ -71,22 +79,27 @@ public final class CartController extends BaseController implements EventListene
 
     private void notifyIfThresholdCrossed() {
         if (this.thresholdOver && !this.cart.isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
+            // If price goes under threshold
             this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_NOT_APPLIED, null);
             this.thresholdOver = false;
         } else if (!this.thresholdOver && this.cart.isPriceEqualOrOverThreshold(DISCOUNT_PRICE)) {
+            // If price goes over threshold
             this.eventManager.notifySubscribers(NotificationTopic.DISCOUNT_APPLIED, null);
             this.thresholdOver = true;
         }
     }
 
+    // Base pizza add
     private void add(Pizza pizza, int quantity) {
         if (quantity == 0) {
             return;
         }
 
         if (this.cart.getProductQty().containsKey(pizza)) {
+            // Add to count if pizza already exists
             this.cart.getProductQty().put(pizza, this.cart.getProductQty().get(pizza) + quantity);
         } else {
+            // Create new entry if pizza does not exists
             this.cart.getProductQty().put(pizza, quantity);
         }
 
@@ -97,6 +110,7 @@ public final class CartController extends BaseController implements EventListene
         this.add(pizza, 1);
     }
 
+    // Base pizza set
     private void set(Pizza pizza, int quantity) {
         if (quantity == 0) {
             this.removeAll(pizza);
@@ -107,6 +121,7 @@ public final class CartController extends BaseController implements EventListene
         this.notifyIfThresholdCrossed();
     }
 
+    // Base pizza remove
     private void remove(Pizza pizza, int quantity) {
         if (this.cart.getProductQty().getOrDefault(pizza, 0) <= quantity) {
             this.cart.getProductQty().remove(pizza);
@@ -125,33 +140,32 @@ public final class CartController extends BaseController implements EventListene
         this.remove(pizza, this.cart.getProductQty().getOrDefault(pizza, 0));
     }
 
+    // Base clear cart
     private void empty() {
         this.cart.getProductQty().clear();
         this.notifyIfThresholdCrossed();
     }
 
     private void handleSelectedItem(String input) {
+        // Get the pizza and qty by index
         Map.Entry<Product, Integer> pizzaEntry = new ArrayList<>(this.cart.getProductQty().entrySet()).get(Integer.parseInt(input) - 1);
         Pizza pizza = (Pizza) pizzaEntry.getKey();
         int count = pizzaEntry.getValue();
+
         System.out.println("\n" + pizza.getName() + " x " + count + " = " + pizza.getPrice() * count);
         System.out.println(this.cartItemMessage);
 
-        String optionInput;
-        boolean isSupportedOption;
-        do {
-            optionInput = BaseController.readInput();
-            isSupportedOption = this.cartItemHandler.containsKey(optionInput);
-            if (!isSupportedOption) {
-                System.out.println("Operation is not supported: " + optionInput);
-            }
-        } while (!isSupportedOption);
-
-        this.cartItemHandler.get(optionInput).accept(pizza);
+        BaseController.runWithInputCheck(
+                this.cartItemHandler::containsKey,
+                "Selection: ",
+                "Operation is not supported",
+                this.cartItemHandler::get
+        );
     }
 
     private void makeOrder() {
         OrderDto order = OrderDao.createOrder(this.cart);
+        // TODO: Split the function
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         String json;
@@ -181,15 +195,15 @@ public final class CartController extends BaseController implements EventListene
     }
 
     private void handleAddCustomQty(Pizza pizza) {
-        this.add(pizza, BaseController.getNonNegativeNumericalInput());
+        this.add(pizza, BaseController.getNonNegativeIntegerInput());
     }
 
     private void handleDecreaseCustomQty(Pizza pizza) {
-        this.remove(pizza, BaseController.getNonNegativeNumericalInput());
+        this.remove(pizza, BaseController.getNonNegativeIntegerInput());
     }
 
     private void handleSetCustomQty(Pizza pizza) {
-        this.set(pizza, BaseController.getNonNegativeNumericalInput());
+        this.set(pizza, BaseController.getNonNegativeIntegerInput());
     }
 
     private void resetCart() {
