@@ -217,6 +217,21 @@ public final class CartController extends BaseController implements EventListene
         this.set(pizza, BaseController.getNonNegativeIntegerInput());
     }
 
+    private void handlePizzaAdd(Object message) {
+        PizzaMessage pizzaMessage = (PizzaMessage) message;
+        this.add(pizzaMessage.getPizza(), pizzaMessage.getCount());
+    }
+
+    private void handlePizzaRemove(Object message) {
+        PizzaMessage pizzaMessage = (PizzaMessage) message;
+        this.remove(pizzaMessage.getPizza(), pizzaMessage.getCount());
+    }
+
+    private void handlePizzaCountSet(Object message) {
+        PizzaMessage pizzaMessage = (PizzaMessage) message;
+        this.set(pizzaMessage.getPizza(), pizzaMessage.getCount());
+    }
+
     private void resetCart() {
         this.cart.getProductQty().clear();
         this.thresholdOver = false;
@@ -277,20 +292,5 @@ public final class CartController extends BaseController implements EventListene
     @Override
     public void update(NotificationTopic topic, Object message) {
         this.notificationHandler.get(topic).accept(message);
-    }
-
-    private void handlePizzaAdd(Object message) {
-        PizzaMessage pizzaMessage = (PizzaMessage) message;
-        this.add(pizzaMessage.getPizza(), pizzaMessage.getCount());
-    }
-
-    private void handlePizzaRemove(Object message) {
-        PizzaMessage pizzaMessage = (PizzaMessage) message;
-        this.remove(pizzaMessage.getPizza(), pizzaMessage.getCount());
-    }
-
-    private void handlePizzaCountSet(Object message) {
-        PizzaMessage pizzaMessage = (PizzaMessage) message;
-        this.set(pizzaMessage.getPizza(), pizzaMessage.getCount());
     }
 }

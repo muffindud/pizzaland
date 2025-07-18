@@ -75,6 +75,7 @@ public final class PizzaMenuController extends BaseController implements EventLi
     }
 
     private void updatePizzaMenu() {
+        // Add the pizzas to the menu
         this.pizzaMenu.getPizzas().clear();
         this.pizzaMenu.getPizzas().add(pizzaFactory.createSausagePizza());
         this.pizzaMenu.getPizzas().add(pizzaFactory.createVegetarianPizza());
