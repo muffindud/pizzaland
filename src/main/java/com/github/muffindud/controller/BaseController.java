@@ -67,7 +67,6 @@ public abstract class BaseController {
         BaseController.navigationMenu.put("0", () -> {
             log.info("Exiting...");
             System.out.println("\nGoodbye!");
-            System.exit(0);
         });
         BaseController.navigationMenuMessage += BaseController.formatMenuMessageOption("0", "Exit");
     }
