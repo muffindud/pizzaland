@@ -159,7 +159,7 @@ public final class CartController extends BaseController implements EventListene
                 this.cartItemHandler::containsKey,
                 "Selection: ",
                 "Operation is not supported",
-                this.cartItemHandler::get
+                i -> this.cartItemHandler.get(i).accept(pizza)
         );
     }
 

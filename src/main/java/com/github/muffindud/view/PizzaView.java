@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public final class PizzaView {
     public static String getPizzaInfo(Pizza pizza, Function<Ingredient, String> ingredientView) {
         return "Pizza: " + pizza.getName() + "\n" +
-                "    Base: " + ingredientView.apply(pizza.getBaseQty().getLeft()) +
+                "   Base: " + ingredientView.apply(pizza.getBaseQty().getLeft()) +
                 "       Quantity: " + pizza.getBaseQty().getRight() + "\n" +
                 "   Crust: " + pizza.getCrust().name().toLowerCase() + "\n" +
                 "   Sauce: " + ingredientView.apply(pizza.getSauceQty().getLeft()) +
